@@ -1,0 +1,38 @@
+name: Build macOS
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Configure
+        run: |
+          set -euxo pipefail
+          ./configure \
+            --prefix="$PWD/build" \
+            --disable-debug \
+            --disable-doc \
+            --disable-ffplay \
+            --disable-x86asm
+
+      - name: Build
+        run: |
+          set -euxo pipefail
+          make -j"$(sysctl -n hw.ncpu)"
+
+      - name: Install
+        run: |
+          set -euxo pipefail
+          make install
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-macos-${{ github.sha }}
+          path: |
+            build/bin/*
+          if-no-files-found: error
