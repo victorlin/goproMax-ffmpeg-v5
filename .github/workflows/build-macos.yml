@@ -12,12 +12,16 @@ jobs:
       - name: Configure
         run: |
           set -euxo pipefail
+          # Ensure SDK is set so framework lookup works
+          export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
           ./configure \
             --prefix="$PWD/build" \
             --disable-debug \
             --disable-doc \
             --disable-ffplay \
-            --disable-x86asm
+            --disable-x86asm \
+            --enable-opencl \
+            --extra-ldflags="-framework OpenCL"
 
       - name: Build
         run: |
